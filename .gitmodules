@@ -1,0 +1,3 @@
+[submodule "libs/mathio"]
+	path = libs/mathio
+	url = https://github.com/Giulianos/mathio.git
