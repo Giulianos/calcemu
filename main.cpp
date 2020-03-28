@@ -1,6 +1,7 @@
 #include "screen.h"
 #include <SDL2/SDL.h>
 #include "fractionio.h"
+#include "powerio.h"
 #include "lineio.h"
 #include "screenbuffer.h"
 
@@ -18,17 +19,19 @@ void renderMath(MathIO * mathio, Screen * s) {
 int main() {
     Screen s;
 
-    LineIO den("128");
-    LineIO num("12");
+    LineIO num((uint8_t*)"123");
+    LineIO den((uint8_t*)"7");
+    LineIO exp((uint8_t*)"a");
 
-    FractionIO fraction(&den, &num);
+    FractionIO base(&num, &den);
+    PowerIO pow(&base, &exp);
 
     while(1) {
         SDL_Event e;
         if(SDL_WaitEvent(&e) && e.type == SDL_QUIT) {
             break;
         }
-        renderMath(&fraction, &s);
+        renderMath(&pow, &s);
         s.display();
     }
 
