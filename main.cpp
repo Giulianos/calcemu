@@ -4,6 +4,7 @@
 #include "powerio.h"
 #include "lineio.h"
 #include "screenbuffer.h"
+#include <time.h>
 
 void renderMath(MathIO * mathio, Screen * s) {
     s->beginRendering();
@@ -20,19 +21,43 @@ int main() {
     Screen s;
 
     LineIO num((uint8_t*)"123");
-    LineIO den((uint8_t*)"7");
-    LineIO exp((uint8_t*)"a");
+    num.setCompactMode(true);
+    num.enableCursor(true);
 
-    FractionIO base(&num, &den);
-    PowerIO pow(&base, &exp);
+    bool run = true;
 
-    while(1) {
+    uint32_t lastBlinkTime = 0;
+    while(run) {
+	uint32_t currentTime = SDL_GetTicks();
+	// Time to blink
+	if (currentTime  - lastBlinkTime > 500) {
+		num.toggleCursorVisibility();
+		lastBlinkTime = SDL_GetTicks();
+	}
+
+	// Render formula
+	renderMath(&num, &s);
+	s.display();
+
         SDL_Event e;
-        if(SDL_WaitEvent(&e) && e.type == SDL_QUIT) {
-            break;
+        if(SDL_WaitEventTimeout(&e, 1)) {
+		if(e.type == SDL_QUIT) {
+			run = false;
+		} else if(e.type == SDL_KEYDOWN) {
+			switch(e.key.keysym.sym) {
+				case SDLK_RIGHT:
+					num.moveCursor(MathIO::CursorDir::Right);
+					num.forceCursorShow();
+					lastBlinkTime = SDL_GetTicks();
+					break;
+				case SDLK_LEFT:
+					num.moveCursor(MathIO::CursorDir::Left);
+					num.forceCursorShow();
+					lastBlinkTime = SDL_GetTicks();
+					break;
+			}
+		}
         }
-        renderMath(&pow, &s);
-        s.display();
     }
 
 }
