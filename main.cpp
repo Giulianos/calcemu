@@ -21,8 +21,9 @@ int main() {
     Screen s;
 
     LineIO num((uint8_t*)"123");
-    num.setCompactMode(true);
-    num.enableCursor(true);
+    LineIO den((uint8_t*)"123");
+    FractionIO frac(&num, &den);
+    frac.enableCursor(true);
 
     bool run = true;
 
@@ -31,12 +32,12 @@ int main() {
 	uint32_t currentTime = SDL_GetTicks();
 	// Time to blink
 	if (currentTime  - lastBlinkTime > 500) {
-		num.toggleCursorVisibility();
+		frac.toggleCursorVisibility();
 		lastBlinkTime = SDL_GetTicks();
 	}
 
 	// Render formula
-	renderMath(&num, &s);
+	renderMath(&frac, &s);
 	s.display();
 
         SDL_Event e;
@@ -46,13 +47,23 @@ int main() {
 		} else if(e.type == SDL_KEYDOWN) {
 			switch(e.key.keysym.sym) {
 				case SDLK_RIGHT:
-					num.moveCursor(MathIO::CursorDir::Right);
-					num.forceCursorShow();
+					frac.moveCursor(MathIO::CursorDir::Right);
+					frac.forceCursorShow();
 					lastBlinkTime = SDL_GetTicks();
 					break;
 				case SDLK_LEFT:
-					num.moveCursor(MathIO::CursorDir::Left);
-					num.forceCursorShow();
+					frac.moveCursor(MathIO::CursorDir::Left);
+					frac.forceCursorShow();
+					lastBlinkTime = SDL_GetTicks();
+					break;
+               case SDLK_DOWN:
+					frac.moveCursor(MathIO::CursorDir::Down);
+					frac.forceCursorShow();
+					lastBlinkTime = SDL_GetTicks();
+					break;
+               case SDLK_UP:
+					frac.moveCursor(MathIO::CursorDir::Up);
+					frac.forceCursorShow();
 					lastBlinkTime = SDL_GetTicks();
 					break;
 			}
