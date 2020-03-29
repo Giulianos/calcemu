@@ -4,7 +4,7 @@
 #define SCREEN_HEIGHT 32
 
 #define EMU_PIXEL_SIZE 5
-#define EMU_PIXEL_MARGIN 1
+#define EMU_PIXEL_MARGIN 0
 
 #define WINDOW_WIDTH SCREEN_WIDTH*(EMU_PIXEL_MARGIN+EMU_PIXEL_SIZE)-1
 #define WINDOW_HEIGHT SCREEN_HEIGHT*(EMU_PIXEL_MARGIN+EMU_PIXEL_SIZE)-1
@@ -12,7 +12,14 @@
 Screen::Screen() {
     SDL_Init(SDL_INIT_VIDEO);
 
-    _w = SDL_CreateWindow("CalcEmu",SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 128*6 - 1, 32*6 - 1, 0);
+    _w = SDL_CreateWindow(
+            "CalcEmu",
+            SDL_WINDOWPOS_CENTERED,
+            SDL_WINDOWPOS_CENTERED,
+            SCREEN_WIDTH*(EMU_PIXEL_SIZE + EMU_PIXEL_MARGIN) - EMU_PIXEL_MARGIN,
+            SCREEN_HEIGHT*(EMU_PIXEL_SIZE + EMU_PIXEL_MARGIN) - EMU_PIXEL_MARGIN,
+            0
+         );
     _r = SDL_CreateRenderer(_w, -1, SDL_RENDERER_ACCELERATED);
     
 
@@ -27,11 +34,11 @@ void Screen::beginRendering() {
 
 void Screen::setPixel(int x, int y, unsigned char value) {
     SDL_Rect rect;
-    rect.x = x*6;
-    rect.y = y*6;
+    rect.x = x*(EMU_PIXEL_SIZE+EMU_PIXEL_MARGIN);
+    rect.y = y*(EMU_PIXEL_SIZE+EMU_PIXEL_MARGIN);
 
-    rect.w = 5;
-    rect.h = 5;
+    rect.w = EMU_PIXEL_SIZE;
+    rect.h = EMU_PIXEL_SIZE;
 
     SDL_SetRenderDrawColor(_r, value, value, value, 255);
     SDL_RenderFillRect(_r, &rect);
