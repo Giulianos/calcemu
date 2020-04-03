@@ -1,17 +1,17 @@
-#include "fractionio.h"
-#include "lineio.h"
-#include "powerio.h"
-#include "screen.h"
-#include "screenbuffer.h"
 #include <SDL2/SDL.h>
-#include <time.h>
+#include <MathIO.h>
+#include <LineIO.h>
+#include <screenbuffer.h>
+#include <screenbufferwindow.h>
+#include "screen.h"
 
 void
 renderMath(MathIO* mathio, Screen* s)
 {
   s->beginRendering();
   ScreenBuffer sb(128, 32);
-  mathio->render(&sb);
+  ScreenBufferWindow sbw(&sb, 1, 1);
+  mathio->Render(&sbw);
   for (int x = 0; x < 128; x++) {
     for (int y = 0; y < 32; y++) {
       s->setPixel(x, y, sb.getPixel(x, y) ? 255 : 0);
@@ -24,24 +24,14 @@ main()
 {
   Screen s;
 
-  LineIO num((uint8_t*)"123");
-  LineIO den((uint8_t*)"123");
-  FractionIO frac(&num, &den);
-  frac.enableCursor(true);
+  MathIO mainIO;
+  mainIO.AttachCursor();
 
   bool run = true;
 
-  uint32_t lastBlinkTime = 0;
   while (run) {
-    uint32_t currentTime = SDL_GetTicks();
-    // Time to blink
-    if (currentTime - lastBlinkTime > 500) {
-      frac.toggleCursorVisibility();
-      lastBlinkTime = SDL_GetTicks();
-    }
-
     // Render formula
-    renderMath(&frac, &s);
+    renderMath(&mainIO, &s);
     s.display();
 
     SDL_Event e;
@@ -51,24 +41,22 @@ main()
       } else if (e.type == SDL_KEYDOWN) {
         switch (e.key.keysym.sym) {
           case SDLK_RIGHT:
-            frac.moveCursor(MathIO::CursorDir::Right);
-            frac.forceCursorShow();
-            lastBlinkTime = SDL_GetTicks();
+            mainIO.MoveCursor(MathIO::CursorDirection::Right);
             break;
           case SDLK_LEFT:
-            frac.moveCursor(MathIO::CursorDir::Left);
-            frac.forceCursorShow();
-            lastBlinkTime = SDL_GetTicks();
+            mainIO.MoveCursor(MathIO::CursorDirection::Left);
             break;
           case SDLK_DOWN:
-            frac.moveCursor(MathIO::CursorDir::Down);
-            frac.forceCursorShow();
-            lastBlinkTime = SDL_GetTicks();
+            mainIO.MoveCursor(MathIO::CursorDirection::Down);
             break;
           case SDLK_UP:
-            frac.moveCursor(MathIO::CursorDir::Up);
-            frac.forceCursorShow();
-            lastBlinkTime = SDL_GetTicks();
+            mainIO.MoveCursor(MathIO::CursorDirection::Up);
+            break;
+          case SDLK_0:
+            mainIO.InsertCharacter('0');
+            break;
+          case SDLK_1:
+            mainIO.InsertCharacter('1');
             break;
         }
       }
